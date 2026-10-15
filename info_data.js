@@ -2,8 +2,8 @@
 const { google } = require('googleapis');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
-const SPREADSHEET_ID = '1UsqyeMhIihMWYK9JWfIoGK-TX7kU1tk-r0yj3kP01_8';
-const SHEET_NAME = 'Info'; // Adjust if your sheet has a different name
+const SPREADSHEET_ID = '1vQ36Tjil5IaU9uui9NwX6hOr1Tz9Fc2wMkeKlZc5zWg';
+const SHEET_NAME = 'Information'; // Adjust if your sheet has a different name
 
 function getCredentials() {
   return JSON.parse(process.env.GOOGLE_CREDENTIALS);
