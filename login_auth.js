@@ -2,8 +2,8 @@
 const { google } = require('googleapis');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
-const SPREADSHEET_ID = '1UsqyeMhIihMWYK9JWfIoGK-TX7kU1tk-r0yj3kP01_8'; // Replace with your sheet ID
-const RANGE = 'People!A2:J'; // Adjust as needed
+const SPREADSHEET_ID = '1vQ36Tjil5IaU9uui9NwX6hOr1Tz9Fc2wMkeKlZc5zWg'; // Replace with your sheet ID
+const RANGE = [ 'Seniors!A2:C', 'Seniors!G2:L', 'Inducted Juniors!A2:C', 'Inducted Juniors!G2:L', 'Applying Juniors!A2:C', 'Applying Juniors!G2:L' ] ; // Adjust as needed
 
 function getCredentials() {
   return JSON.parse(process.env.GOOGLE_CREDENTIALS);
