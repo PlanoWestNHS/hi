@@ -2,9 +2,11 @@
 const { google } = require('googleapis');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-const SPREADSHEET_ID = '1UsqyeMhIihMWYK9JWfIoGK-TX7kU1tk-r0yj3kP01_8';
+const SPREADSHEET_ID = '1vQ36Tjil5IaU9uui9NwX6hOr1Tz9Fc2wMkeKlZc5zWg';
 const SHEET_NAME = 'Hour Log'; 
-const PEOPLE_SHEET = 'People';
+
+// CHANGED: students are now split across three sheets
+const PEOPLE_SHEETS = ['Seniors', 'Inducted Juniors', 'Applying Juniors'];
 
 function getCredentials() {
   return JSON.parse(process.env.GOOGLE_CREDENTIALS);
@@ -43,12 +45,37 @@ async function getUserHours(userId) {
   return { entries, totalHours };
 }
 
-// 🔹 Now accepts peopleRow
-async function updatePeopleSheet(peopleRow, totalHours) {
+// CHANGED: finds the user's sheet and row automatically
+async function findUserInPeopleSheets(userId) {
   await initSheets();
 
-  const range = `${PEOPLE_SHEET}!D${peopleRow}`; 
-  // no +2, because peopleRow is already the actual sheet row index
+  for (const sheetName of PEOPLE_SHEETS) {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${sheetName}!A2:H`,
+    });
+
+    const rows = res.data.values || [];
+
+    for (let i = 0; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === String(userId).trim()) {
+        return {
+          sheetName,
+          sheetRowNumber: i + 2,
+        };
+      }
+    }
+  }
+
+  throw new Error(`User ${userId} was not found`);
+}
+
+// CHANGED: finds the correct sheet/row and updates Physical Hours in column H
+async function updatePeopleSheet(userId, totalHours) {
+  await initSheets();
+
+  const userLocation = await findUserInPeopleSheets(userId);
+  const range = `${userLocation.sheetName}!H${userLocation.sheetRowNumber}`;
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
@@ -58,8 +85,8 @@ async function updatePeopleSheet(peopleRow, totalHours) {
   });
 }
 
-// 🔹 Pass peopleRow into here
-async function addUserHour(userId, date, hours, description, firstName, lastName, peopleRow) {
+// CHANGED: peopleRow is no longer needed
+async function addUserHour(userId, date, hours, description, firstName, lastName) {
   await initSheets();
   const fullName = `${firstName} ${lastName}`;
   const row = [userId, date, hours, description, fullName];
@@ -72,10 +99,13 @@ async function addUserHour(userId, date, hours, description, firstName, lastName
   });
 
   const { totalHours } = await getUserHours(userId);
-  await updatePeopleSheet(peopleRow, totalHours);
+
+  // CHANGED: userId is used to locate the correct student row
+  await updatePeopleSheet(userId, totalHours);
 }
 
-async function deleteUserHour(userId, indexToDelete, peopleRow) {
+// CHANGED: peopleRow is no longer needed
+async function deleteUserHour(userId, indexToDelete) {
   await initSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
@@ -103,7 +133,9 @@ async function deleteUserHour(userId, indexToDelete, peopleRow) {
   });
 
   const { totalHours } = await getUserHours(userId);
-  await updatePeopleSheet(peopleRow, totalHours);
+
+  // CHANGED: userId is used to locate the correct student row
+  await updatePeopleSheet(userId, totalHours);
 }
 
 module.exports = { getUserHours, addUserHour, deleteUserHour };
