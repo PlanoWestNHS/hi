@@ -85,7 +85,7 @@ async function updatePeopleSheet(userId, totalHours) {
   });
 }
 
-// CHANGED: peopleRow is no longer needed
+
 async function addUserHour(userId, date, hours, description, firstName, lastName) {
   await initSheets();
   const fullName = `${firstName} ${lastName}`;
@@ -104,7 +104,7 @@ async function addUserHour(userId, date, hours, description, firstName, lastName
   await updatePeopleSheet(userId, totalHours);
 }
 
-// CHANGED: peopleRow is no longer needed
+
 async function deleteUserHour(userId, indexToDelete) {
   await initSheets();
   const res = await sheets.spreadsheets.values.get({
