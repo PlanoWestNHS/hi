@@ -96,8 +96,7 @@ app.post('/login', async (req, res) => {
             penaltyHours,
             m1,
             m2,
-            m3,
-            peopleRow: row+2
+            m3
         };
         res.redirect('/');
     } else {
@@ -125,10 +124,11 @@ app.get('/hrlog', checkLoggedIn, async (req, res) => {
 
 app.post('/hrlog/add', checkLoggedIn, async (req, res) => {
     const { date, hours, description } = req.body;
-    const { id: userId, firstName, lastName, peopleRow } = req.session.user;
+
+    const { id: userId, firstName, lastName } = req.session.user;
 
     try {
-        await addUserHour(userId, date, hours, description, firstName, lastName, peopleRow);
+        await addUserHour(userId, date, hours, description, firstName, lastName);
         res.redirect('/hrlog');
     } catch (error) {
         console.error('Add error:', error);
@@ -143,7 +143,8 @@ app.post('/hrlog/delete', checkLoggedIn, async (req, res) => {
     if (isNaN(index)) return res.status(400).send('Invalid index.');
 
     try {
-        await deleteUserHour(userId, index, req.session.user.peopleRow);
+        // CHANGED: peopleRow argument removed
+        await deleteUserHour(userId, index);
         res.redirect('/hrlog');
     } catch (err) {
         console.error('Delete error:', err);
