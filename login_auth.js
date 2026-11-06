@@ -8,7 +8,7 @@ const RANGES = [
   'Seniors!A2:M',
   'Inducted Juniors!A2:M',
   'Applying Juniors!A2:M'
-]; //  read all needed columns from all three sheets
+];
 
 function getCredentials() {
   return JSON.parse(process.env.GOOGLE_CREDENTIALS);
@@ -23,7 +23,7 @@ async function getSheetData() {
   const res = await sheets.spreadsheets.values.batchGet({
     spreadsheetId: SPREADSHEET_ID,
     ranges: RANGES,
-  }); 
+  });
 
   const users = [];
 
@@ -34,9 +34,17 @@ async function getSheetData() {
       if (!row[0]) continue;
 
       users.push([
-        row[0], row[2], row[1],  row[6] || 0, row[7] || 0, row[8] || 0,
-        0,            // placeholder for old Final Penalty Hours column
-        row[9] || '', row[10] || '', row[11] || '', row[12] || ''
+        row[0],
+        row[2] || '',
+        row[1] || '',
+        row[6] || 0,
+        row[7] || 0,
+        row[8] || 0,
+        0,
+        row[9] || '',
+        row[10] || '',
+        row[11] || '',
+        row[12] || ''
       ]);
     }
   }
