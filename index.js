@@ -1,11 +1,5 @@
-const fs = require('fs');
-const path = require('path');
 const express = require('express');
 const session = require('express-session');
-
-// Dynamically create credentials.json from environment variable
-const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
-fs.writeFileSync(CREDENTIALS_PATH, process.env.GOOGLE_CREDENTIALS);
 
 const getSheetData = require('./login_auth');
 const info = require('./info_data');
@@ -68,7 +62,13 @@ app.post('/login', async (req, res) => {
     const first = req.body.firstName;
     const last = req.body.lastName;
 
-    const users = await getSheetData();
+    let users;
+    try {
+        users = await getSheetData();
+    } catch (err) {
+        console.error('Login error:', err);
+        return res.render('login', { error: 'Unable to reach the server, please try again.' });
+    }
 
     let valid = false;
     let row = 0;
@@ -163,10 +163,9 @@ app.get('/notifs', checkLoggedIn, async (req, res) => {
 });
 
 app.get('/settings', checkLoggedIn, async (req, res) => {
-    const { notifs } = await info.getNotifications();
     const userId = req.session.user.id;
-    const { entries, totalHours } = await getUserHours(userId);
-    res.render('settings', { notifs, totalHours });
+    const { totalHours } = await getUserHours(userId);
+    res.render('settings', { totalHours });
 });
 
 app.get('/faq', checkLoggedIn, (req, res) => res.render('faq'));

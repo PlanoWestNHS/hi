@@ -8,6 +8,10 @@ const SHEET_NAME = 'Hour Log';
 // CHANGED: students are now split across three sheets
 const PEOPLE_SHEETS = ['Seniors', 'Inducted Juniors', 'Applying Juniors'];
 
+function sameId(a, b) {
+  return String(a ?? '').trim() === String(b ?? '').trim();
+}
+
 function getCredentials() {
   return JSON.parse(process.env.GOOGLE_CREDENTIALS);
 }
@@ -32,11 +36,11 @@ async function getUserHours(userId) {
   const rows = res.data.values || [];
 
   const entries = rows
-    .filter(row => row[0] === userId)
+    .filter(row => sameId(row[0], userId))
     .map(row => ({
       id: row[0],
       date: row[1],
-      hours: parseFloat(row[2]),
+      hours: parseFloat(row[2]) || 0,
       description: row[3],
       fullName: row[4],
     }));
@@ -58,7 +62,7 @@ async function findUserInPeopleSheets(userId) {
     const rows = res.data.values || [];
 
     for (let i = 0; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === String(userId).trim()) {
+      if (sameId(rows[i][0], userId)) {
         return {
           sheetName,
           sheetRowNumber: i + 2,
@@ -115,7 +119,7 @@ async function deleteUserHour(userId, indexToDelete) {
 
   const userRowsWithSheetIndex = [];
   for (let i = 0; i < rows.length; i++) {
-    if (rows[i][0] === userId) {
+    if (sameId(rows[i][0], userId)) {
       userRowsWithSheetIndex.push({ row: rows[i], sheetRowNumber: i + 2 });
     }
   }
